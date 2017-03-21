@@ -1,0 +1,9 @@
+#toolbar-content-title {
+    margin-right: 60px;
+}
+
+@media (max-width: 750px) {
+    .toolbar-content-menu {
+        display: none;
+    }
+}

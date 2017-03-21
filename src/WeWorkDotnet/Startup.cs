@@ -1,17 +1,13 @@
-﻿using WeWorkDotnet.Data;
-using WeWorkDotnet.Models;
-using WeWorkDotnet.Services;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.SpaServices.Webpack;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.Swagger;
-using System.Linq;
+using WeWorkDotnet.Repositories.Things;
+using WeWorkDotnet.Models;
 
 namespace WeWorkDotnet
 {
@@ -32,91 +28,38 @@ namespace WeWorkDotnet
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Adds framework services.
-            // Identity & SQLite.
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-            // Identity options.
-            services.Configure<IdentityOptions>(options =>
+            services.AddCors(options =>
             {
-                // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
             });
 
+            // Add framework services.
+            services.AddSingleton<IThingsRepository, ThingsRepository>();
             services.AddMvc();
-
-            // Claims-Based Authorization: role claims.
-            services.AddAuthorization(options =>
-            {
-                // Policy for dashboard: only administrator role.
-                options.AddPolicy("Manage Accounts", policy => policy.RequireClaim("role", "administrator"));
-                // Policy for resources: user or administrator role. 
-                options.AddPolicy("Access Resources", policyBuilder => policyBuilder.RequireAssertion(
-                        context => context.User.HasClaim(claim => (claim.Type == "role" && claim.Value == "user")
-                           || (claim.Type == "role" && claim.Value == "administrator"))
-                    )
-                );
-            });
-
-            // Adds application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
-            services.AddTransient<IDbService, DbService>();
-
-            // Adds IdentityServer.
-            // The AddTemporarySigningCredential extension creates temporary key material for signing tokens on every start.
-            // Again this might be useful to get started, but needs to be replaced by some persistent key material for production scenarios.
-            // See the cryptography docs for more information: http://docs.identityserver.io/en/release/topics/crypto.html#refcrypto
-            services.AddIdentityServer()
-                .AddTemporarySigningCredential()
-                .AddInMemoryIdentityResources(Config.GetIdentityResources())
-                .AddInMemoryApiResources(Config.GetApiResources())
-                .AddInMemoryClients(Config.GetClients())
-                .AddAspNetIdentity<ApplicationUser>(); // IdentityServer4.AspNetIdentity.
-
-            // Registers the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "WebAPI", Version = "v1" });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext _context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            if (env.IsDevelopment())
-            {
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true
-                });
-            }
-
-            // Router on the server must matches the router on the client (see app.routing.ts) to use PathLocationStrategy.
-            var appRoutes = new[] {
+            var angularRoutes = new[] {
                  "/home",
-                 "/resources",
-                 "/dashboard",
-                 "/resources",
-                 "/signin",
-                 "/signup"
+                 "/about"
              };
 
             app.Use(async (context, next) =>
             {
-                if (context.Request.Path.HasValue && appRoutes.Contains(context.Request.Path.Value))
+                if (context.Request.Path.HasValue && null != angularRoutes.FirstOrDefault(
+                    (ar) => context.Request.Path.Value.StartsWith(ar, StringComparison.OrdinalIgnoreCase)))
                 {
                     context.Request.Path = new PathString("/");
                 }
@@ -124,39 +67,17 @@ namespace WeWorkDotnet
                 await next();
             });
 
-            // IdentityServer4.AccessTokenValidation: authentication middleware for the API.
-            app.UseIdentityServerAuthentication(new IdentityServerAuthenticationOptions
-            {
-                Authority = "http://localhost:5000/",
-                //Authority = "http://WeWorkDotnet.azurewebsites.net",
-                AllowedScopes = { "WebAPI" },
+            app.UseCors("AllowAllOrigins");
 
-                RequireHttpsMetadata = false
-            });
-
-            app.UseMvc();
-
-            // Microsoft.AspNetCore.StaticFiles: API for starting the application from wwwroot.
-            // Uses default files as index.html.
             app.UseDefaultFiles();
-            // Uses static file for the current path.
             app.UseStaticFiles();
 
-            app.UseIdentity();
-
-            app.UseIdentityServer();
-
-            // Enables middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enables middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseMvc(routes =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebAPI v1");
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            // Extension method to populate db: Models > DbExtension.cs
-            app.PopulateDb();
         }
     }
 }

@@ -302,19 +302,24 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Angular
+# Angular 2
 # =========================
 
 # AoT compilation files
 aot/
 
 # TypeScript compilation files
-**/app/**/*.js
-**/app/**/*.map
-**/app/*.js
-**/app/*.map
-
-PublishProfiles
-/src/WeWorkDotnet/wwwroot/dist/app.bundle.js
-/src/WeWorkDotnet/wwwroot/dist/app.bundle.js.map
-/src/WeWorkDotnet/wwwroot/dist/app-aot.5301d2dcac09b79cb496.bundle.js
+**/angularApp/app/**/*.js
+**/angularApp/app/**/*.map
+**/angularApp/app/*.js
+**/angularApp/app/*.map
+**/angularApp/*.js
+**/angularApp/*.map
+WeWorkDotnet/src/WeWorkDotnet/wwwroot/
+src/WeWorkDotnet/wwwroot/assets
+src/WeWorkDotnet/wwwroot/dist
+src/WeWorkDotnet/wwwroot/dist/
+src/WeWorkDotnet/wwwroot/index.html
+/src/WeWorkDotnet/.vscode
+/src/WeWorkDotnet/wwwroot/favicon.ico
+/src/WeWorkDotnet/wwwroot/assets

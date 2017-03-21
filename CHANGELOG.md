@@ -1,1 +1,0 @@
-## We Work Dotnet Changelog

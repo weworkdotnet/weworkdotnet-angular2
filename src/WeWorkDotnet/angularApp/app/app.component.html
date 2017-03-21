@@ -1,0 +1,38 @@
+﻿<td-layout #layout>
+    <td-navigation-drawer sidenavTitle="We Work Dotnet" name="Firstname Lastname" email="firstname.lastname@company.com">
+        <md-nav-list>
+            <template let-item let-last="last" ngFor [ngForOf]="routes">
+                <a md-list-item [routerLink]="[item.route]" (click)="layout.close()"><md-icon>{{item.icon}}</md-icon>{{item.title}}</a>
+            </template>
+        </md-nav-list>
+        <md-nav-list td-navigation-drawer-menu>
+            <a md-list-item><md-icon>exit_to_app</md-icon>Sign out</a>
+        </md-nav-list>
+    </td-navigation-drawer>
+    <td-layout-nav>
+        <div td-toolbar-content layout="row" layout-align="center center" flex>
+            <span id="toolbar-content-title">We Work DOTNET</span>
+            <span class="toolbar-content-menu">
+                <button md-button class="text-upper">Jobs</button>
+                <button md-button class="text-upper">Developers</button>
+            </span>
+            <span flex></span>
+            <span class="toolbar-content-menu">
+                <button md-button>Register</button>
+                <button md-button>Sign in</button>
+            </span>
+        </div>
+        <div class="md-content" flex md-scroll-y>
+            <router-outlet></router-outlet>
+        </div>
+        <td-layout-footer>
+            <div layout="row" layout-align="start center">
+                <span class="md-caption">Copyright &copy; 2017 We Work Dotnet. All rights reserved</span>
+                <span flex></span>
+                <a md-icon-button mdTooltipPosition="above" mdTooltip="E-Mail" href="mailto:hello@weworkdotnet.com" target="_top"><md-icon class="fa-2x" fontSet="fontawesome" fontIcon="fa-envelope-o"></md-icon></a>
+                <a md-icon-button mdTooltipPosition="above" mdTooltip="Twitter" href="https://twitter.com/weworkdotnet" target="_blank"><md-icon class="fa-2x" fontSet="fontawesome" fontIcon="fa-twitter"></md-icon></a>
+                <a md-icon-button mdTooltipPosition="above" mdTooltip="Github" href="https://github.com/weworkdotnet/weworkdotnet" target="_blank"><md-icon class="fa-2x" fontSet="fontawesome" fontIcon="fa-github"></md-icon></a>
+            </div>
+        </td-layout-footer>
+    </td-layout-nav>
+</td-layout>

@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "es5",
     "module": "es2015",
@@ -16,8 +16,8 @@
     ]
   },
   "files": [
-    "app/app.module.ts",
-    "app/main-aot.ts"
+    "angularApp/app/app.module.ts",
+    "angularApp/main-aot.ts"
   ],
   "angularCompilerOptions": {
     "genDir": "aot",
